@@ -1,0 +1,117 @@
+/* * -----------------------------------------------------------------------------
+ * MODULE: High-Low Number Guessing Game (Secure & Optimized)
+ * AUTHOR: devilyass
+ * * OPTIMIZATIONS:
+ * 1. Security: Replaced scanf() with fgets/strtol to prevent Buffer DoS.
+ * 2. Robustness: Handles EOF, non-integers, and out-of-bounds input.
+ * 3. Clarity: Removed magic numbers; used clear control flow.
+ * -----------------------------------------------------------------------------
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <errno.h>  // For checking strtol overflow
+#include <limits.h> // For INT_MAX/MIN
+
+// CONFIGURATION CONSTANTS
+#define MIN_RANGE 1
+#define MAX_RANGE 100
+#define BUFFER_SIZE 64 // Sufficient for integer input
+
+// Helper function to safely read an integer
+// Returns 1 on success, 0 on failure
+int get_safe_input(int *out_value) {
+    char buffer[BUFFER_SIZE];
+    char *endptr;
+    long converted_val;
+
+    // 1. Read line safely (handles EOF and prevents infinite loops)
+    if (fgets(buffer, BUFFER_SIZE, stdin) == NULL) {
+        return 0; // EOF or Read Error
+    }
+
+    // 2. Parse integer (skipping whitespace)
+    errno = 0; // Reset error flag
+    converted_val = strtol(buffer, &endptr, 10);
+
+    // 3. Validation: Check for conversion errors, non-digits, or overflow
+    if (buffer == endptr) { 
+        return 0; // No digits found (e.g., user pressed Enter or typed "abc")
+    }
+    
+    // Check if the input contains garbage after the number (e.g., "50abc")
+    // We allow a newline at the end
+    if (*endptr != '\0' && *endptr != '\n') {
+        return 0;
+    }
+
+    // Check strict integer overflow limits
+    if ((errno == ERANGE && (converted_val == LONG_MAX || converted_val == LONG_MIN)) 
+        || (converted_val > INT_MAX || converted_val < INT_MIN)) {
+        return 0;
+    }
+
+    *out_value = (int)converted_val;
+    return 1;
+}
+
+int main(void) {
+    int realNum;
+    int guessedNum;
+    int attempts = 0;
+
+    // 1. Initialization
+    // Note: In production crypto, use getrandom() or specialized CSPRNG.
+    // For a game, rand() seeded with time is computationally efficient.
+    srand((unsigned int)time(NULL));
+    realNum = MIN_RANGE + rand() % (MAX_RANGE - MIN_RANGE + 1);
+
+    printf("==========================================\n");
+    printf("   SECURE NUMBER GUESSING SYSTEM\n");
+    printf("   Range: [%d - %d]\n", MIN_RANGE, MAX_RANGE);
+    printf("==========================================\n");
+
+    // 2. Main Game Loop (Infinite until explicit break)
+    while (1) {
+        printf("\n[%d] Enter your guess: ", attempts + 1);
+
+        // A. Input Validation
+        if (!get_safe_input(&guessedNum)) {
+            printf("(!) Error: Invalid input. Please enter a whole number.\n");
+            
+            // Check if stdin is closed (EOF), exit to prevent infinite loop
+            if (feof(stdin)) {
+                printf("\nInput stream closed. Exiting.\n");
+                return 1;
+            }
+            continue; 
+        }
+
+        attempts++;
+
+        // B. Logic Processing
+        if (guessedNum < MIN_RANGE || guessedNum > MAX_RANGE) {
+            printf("(!) Out of bounds. Please guess between %d and %d.\n", MIN_RANGE, MAX_RANGE);
+            continue;
+        }
+
+        if (guessedNum == realNum) {
+            // SUCCESS CASE
+            break; 
+        } 
+        
+        // Fast path for hints using ternary logic could be used, 
+        // but explicit if/else is better for readability here.
+        if (guessedNum < realNum) {
+            printf(" -> Too LOW. Try moving up.\n");
+        } else {
+            printf(" -> Too HIGH. Try moving down.\n");
+        }
+    }
+
+    // 3. Cleanup & Exit
+    printf("\nSUCCESS! You found the number %d in %d attempts.\n", realNum, attempts);
+    
+    return 0;
+}
