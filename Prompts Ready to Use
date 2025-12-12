@@ -1,0 +1,18 @@
+Prompts Ready to use :
+
+Prompt N°1 (improve your actual prompts) : I want you to act as a prompt engineer expert who will help me upgrade 
+my prompt to get the best results from Gemini(or any other model). This is my prompt: ‘…’. 
+
+
+Prompt N°2 ( setting up a role for the AI) : I am a (any domain you want the AI to act in) professional with 15+ years of experience.
+My specialties include: (add the specialties you want the AI to focus on).
+
+Prompt N°3 ( finding bugs and weak spots) : Analyze the following (type of content: code, report, or any text). Explain it in clear and simple terms, 
+spot any potential bugs, issues, or weak spots, and generate an improved version.
+Content to Analyze: {Enter your code, text, or other content here}.
+
+Prompt N°4 ( improving the output ) Example "Optimizing code" : Optimize this code clarity, performance, and security as top priorities .Ensure memory safety, handle all edge cases , 
+validate inputs , and simplify logic where possible. Add comments and output results (header → optimized code → end module format) if its possible.
+
+
+By : Devilyass
